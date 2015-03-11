@@ -1,0 +1,23 @@
+{
+  "name": "icnsjs",
+  "version": "0.0.0",
+  "description": "",
+  "main": "libicns.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/snxd/icnsjs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/snxd/icnsjs/issues"
+  },
+  "homepage": "https://github.com/snxd/icnsjs",
+  "dependencies": {
+    "lodash": "^3.5.0",
+    "node-png": "^0.4.3"
+  }
+}
