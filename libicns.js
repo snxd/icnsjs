@@ -77,10 +77,6 @@ exports.getPngReadStream = function(filePath, fetchIconType, next) {
 	});
 }
 
-exports.writePart = function(filePath, outputFile, offset, length) {
-	fs.createReadStream(filePath, {start:offset, end:offset+length}).pipe(fs.createWriteStream(outputFile));
-}
-
 exports.printItem = function(filePath, offset) {
 	this.readItem(filePath, offset, function(err, label, size) {
 		if(err) {
