@@ -86,4 +86,4 @@ exports.doSimple = function() {
 	this.getIconReadStream(f, fmt).pipe(fs.createWriteStream(fmt + '-out.png'));
 }
 
-exports.doSimple();
+//exports.doSimple();
