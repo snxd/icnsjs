@@ -19,7 +19,7 @@ exports.isValidIcns = function(filePath) {
 exports.loadToc = function(filePath) {
 	var tocHeader = this.readItem(filePath, 8);
 	if(tocHeader.label.trim() !== 'TOC') {
-		throw new Error('Unable to find a valid TOC in file');
+		return this.loadTocManual(filePath);
 	}
 
 	var toc = [];
@@ -36,6 +36,21 @@ exports.loadToc = function(filePath) {
     	toc.push({format:label, size:size, offset:offset});
     	offset += size;
     }
+
+    return toc;
+};
+
+exports.loadTocManual = function(filePath) {
+	var fileHeader = this.readItem(filePath, 0);
+	//var tocHeader = this.readItem(filePath, 8);
+	var toc = [];
+	var offset = 8;
+
+	while(offset < fileHeader.size) {
+		var entry = this.readItem(filePath, offset);
+		toc.push({format:entry.label, size:entry.size, offset:offset});
+		offset += entry.size;
+	}
 
     return toc;
 };
@@ -66,13 +81,16 @@ exports.printItem = function(filePath, offset) {
 }
 
 exports.doSimple = function() {
-	var f = './app.icns';
+	var f = './app2.icns';
 	var self = this;
 	//exports.printDetails('./app.icns');
 	console.log('valid Icns:', this.isValidIcns(f));
 
 	var toc = this.loadToc(f);
-	console.log(toc);
+	console.log('auto TOC', toc);
+
+	var toc2 = this.loadTocManual(f);
+	console.log('manual TOC', toc2);
 
 	/*_.map(toc, function(item) {
 		var fmt = item.format;
@@ -82,8 +100,9 @@ exports.doSimple = function() {
 			.pipe(fs.createWriteStream(fmt + '-out.png'));
 	});*/
 	//exports.writePart('./app.icns', './out.png', 37844, 25657);
-	var fmt = 'ic08';
-	this.getIconReadStream(f, fmt).pipe(fs.createWriteStream(fmt + '-out.png'));
+	//var fmt = 'ic08';
+	//this.getIconReadStream(f, fmt).pipe(fs.createWriteStream(fmt + '-out.png'));
 }
 
 //exports.doSimple();
+
