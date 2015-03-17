@@ -1,5 +1,6 @@
 var fs = require('fs');
 var _ = require('lodash');
+var magick = require('imagemagick-stream');
 
 exports.readItem = function(filePath, offset) {
 	var fd = fs.openSync(filePath, 'r');
@@ -15,6 +16,16 @@ exports.isValidIcns = function(filePath) {
 
 	return header.label.trim() === 'icns';
 };
+
+exports.isPng = function(filePath, offset) {
+	var fd = fs.openSync(filePath, 'r');
+    var buffer = new Buffer(8);
+    var magicPNG = [0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A];
+    fs.readSync(fd, buffer, 0, 8, offset);
+    fs.closeSync(fd);
+
+    return _.isEqual(magicPNG, buffer.toJSON());
+}
 
 exports.loadToc = function(filePath) {
 	var tocHeader = this.readItem(filePath, 8);
@@ -68,7 +79,20 @@ exports.getIconReadStream = function(filePath, fetchIconType) {
 
 	//var stream = fs.createReadStream(filePath, {start:entry.offset, end:entry.offset+entry.size})		
 	var iconRange = {start:entry[0].offset, end:entry[0].offset+entry[0].size};
-	return fs.createReadStream(filePath, iconRange);
+
+	if(true || this.isPng(filePath, iconRange.start)) {
+		return fs.createReadStream(filePath, iconRange);
+	}
+	else {
+
+			var format = magick().outputFormat('PNG');
+			
+		return fs.createReadStream(filePath, iconRange).pipe(format);
+
+
+		
+	}
+	
 }
 
 exports.printItem = function(filePath, offset) {
@@ -81,16 +105,14 @@ exports.printItem = function(filePath, offset) {
 }
 
 exports.doSimple = function() {
-	var f = './app2.icns';
+	//var f = './app3.icns';
 	var self = this;
 	//exports.printDetails('./app.icns');
-	console.log('valid Icns:', this.isValidIcns(f));
+	//console.log('valid Icns:', this.isValidIcns(f));
 
-	var toc = this.loadToc(f);
-	console.log('auto TOC', toc);
+	//_.map(['./app.icns', './app2.icns'], function(f) {console.log(f, self.loadToc(f))});
 
-	var toc2 = this.loadTocManual(f);
-	console.log('manual TOC', toc2);
+	//console.log(this.isPng('./app.icns', 37836 + 8));
 
 	/*_.map(toc, function(item) {
 		var fmt = item.format;
@@ -100,8 +122,17 @@ exports.doSimple = function() {
 			.pipe(fs.createWriteStream(fmt + '-out.png'));
 	});*/
 	//exports.writePart('./app.icns', './out.png', 37844, 25657);
-	//var fmt = 'ic08';
-	//this.getIconReadStream(f, fmt).pipe(fs.createWriteStream(fmt + '-out.png'));
+	var fmt = 'ic08';
+	_.map(['./app2.icns'], function(f) {
+		try {
+			self.getIconReadStream(f, fmt).pipe(fs.createWriteStream(f + '-' + fmt + '-out.png'));
+		}
+		catch(ex) {
+			console.log("ex", ex);
+		}
+		
+	});
+
 }
 
 //exports.doSimple();
